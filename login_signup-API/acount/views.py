@@ -1,6 +1,12 @@
 
 
+from genericpath import exists
+import importlib
 from importlib.resources import contents
+from logging import exception
+from operator import contains
+from re import search
+from turtle import title
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -10,15 +16,11 @@ from rest_framework import  generics
 from .models import *
 from .serializers import *
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.permissions import IsAuthenticated 
-
-from django.core.mail import EmailMultiAlternatives
-from django.dispatch import receiver
-from django.template.loader import render_to_string
-from django.urls import reverse
-
-from django_rest_passwordreset.signals import reset_password_token_created
-
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import BasicAuthentication
+from .pagination import PageNumber
+from rest_framework.pagination import PageNumberPagination
+from django.db.models import Q
 
 
 
@@ -34,7 +36,7 @@ def get_tokens_for_user(user):
 
 # Create your views here.
 
-class StudentSignup(generics.CreateAPIView):
+class UserSignup(generics.CreateAPIView):
     
     serializer_class = UserSerializer
     def post(self,request,format=None):
@@ -47,9 +49,9 @@ class StudentSignup(generics.CreateAPIView):
 
 
 
-class Studentlogin(APIView):
+class Userlogin(APIView):
     def post(self,request,format=None):
-        serializer=Studentlogin_Serializer(data=request.data)
+        serializer=Userlogin_Serializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
           
             email=serializer.data.get('email')
@@ -63,20 +65,36 @@ class Studentlogin(APIView):
 
 
 
-class StudentApi(APIView):
+class Product_Api(APIView,PageNumberPagination): 
+    
+    permission_classes=[IsAuthenticated]
+
+    page_size =3
 
     def get(self,request,pk=None,format=None):
+        
         id=pk
-        if id is not None:
-            stu=Product.objects.get(pk=id)
-            serializer=ProductSerializer(stu)
-            return Response(serializer.data)
-        stu=Product.objects.all()
-        serializer=ProductSerializer(stu,many=True)
-        return Response(serializer.data)
+        try:
 
+            if id is not None:
+                stu=Product.objects.get(pk=id)
+                serializer=ProductSerializer(stu)
+                return Response(serializer.data)
+            
+            stu=Product.objects.all()
+            if request.GET.get('title') is not None:  
+                stu=stu.filter(Q(title__contains=request.GET.get('title')))
 
+            results = self.paginate_queryset(stu, request)    
+            serializer=ProductSerializer(results,many=True)
+            return self.get_paginated_response(serializer.data)
+
+        except:
+            return Response("Id does not exist")  
+
+    
     def post(self,request,format=None):
+        
         serializer=ProductSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -101,3 +119,9 @@ class StudentApi(APIView):
         stu=Product.objects.get(pk=id)
         stu.delete()
         return Response({'msg':'Data is deleted'})
+
+
+
+
+        
+       

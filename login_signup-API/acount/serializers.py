@@ -5,10 +5,12 @@ import email
 from lib2to3.pgen2 import token
 from pyexpat import model
 from tkinter.tix import Tree
+from unittest.util import _MAX_LENGTH
 from wsgiref import validate
+from zoneinfo import available_timezones
 from django.forms import ValidationError
 from rest_framework import serializers
-
+from rest_framework.response import Response
 # from acount.ultis import util
 from  .models import *
 from django.contrib.auth.password_validation import validate_password
@@ -46,7 +48,7 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
-class Studentlogin_Serializer(serializers.ModelSerializer):
+class Userlogin_Serializer(serializers.ModelSerializer):
     email=serializers.EmailField()
     class Meta:
         model=User
@@ -55,6 +57,17 @@ class Studentlogin_Serializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    availability_stock=serializers.SerializerMethodField()
     class Meta:
         model=Product
-        fields=['title','description','price','price_currency','image','stock']
+        fields=['id','user','title','description','price','price_currency','image','stock','availability_stock']
+    
+
+    def get_availability_stock(self,obj):
+        if obj.stock is True:
+            return "stock is available"
+        else:
+            return "stock is not available"
+
+
+    

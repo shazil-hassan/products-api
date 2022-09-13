@@ -54,8 +54,11 @@ class User(AbstractUser):
     objects = UserManager()
 
 class Product(models.Model):
+
     def nameFile(instance,filename):
         return '/'.join(['images',str(instance.title),filename])
+
+    user=models.ForeignKey(User, on_delete=models.CASCADE)
     title=models.CharField(max_length=255)
     description=models.CharField(max_length=255)
     price=MoneyField(max_digits=14, decimal_places=2, default_currency='USD')
@@ -64,6 +67,6 @@ class Product(models.Model):
     create_at=models.DateTimeField(auto_now_add=True)
     update_at=models.DateTimeField(auto_now=True)
 
-def __str__(self):
-    return self.title
+    def __str__(self):
+        return self.title
     

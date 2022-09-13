@@ -38,9 +38,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'django_filters',
     'django_rest_passwordreset',
     'rest_framework_simplejwt',
     'corsheaders',
+    
+
     'acount',
     'djmoney',
 ]
@@ -88,14 +91,14 @@ DATABASES = {
 }
 
 
-REST_FRAMEWORK = {
+# REST_FRAMEWORK = {
     
-    'DEFAULT_AUTHENTICATION_CLASSES': (
+#     'DEFAULT_AUTHENTICATION_CLASSES': (
        
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
-   
-}
+#         'rest_framework_simplejwt.authentication.JWTAuthentication',
+#     )
+  
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -140,6 +143,16 @@ STATICFILES_DIRS = [
 ]
 
 AUTH_USER_MODEL = "acount.User"
+
+
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated'
+    ]
+}
+
 
 # mail sending
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
