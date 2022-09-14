@@ -42,9 +42,9 @@ class UserSignup(generics.CreateAPIView):
     def post(self,request,format=None):
         serializer=UserSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            user=serializer.save()
-            token=get_tokens_for_user(user)
-            return Response({'token':token,'msg':'Sign Up Successfully'})
+            serializer.save()
+            
+            return Response({'msg':'Sign Up Successfully'})
         return Response({'msg':'InValid Information'})    
 
 
